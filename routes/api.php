@@ -1,6 +1,8 @@
 <?php
 
-use App\Models\Product;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\AuthController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,17 +17,28 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Public routes
+// User
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+// Product
+Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products/{id}', [ProductController::class, 'show']);
+Route::get('/products/search/{name}', [ProductController::class, 'search']);
+
+
+// Protected routes
+Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::post('/products', [ProductController::class, 'store']);
+    Route::put('/products/{id}', [ProductController::class, 'update']);
+    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/users', [AuthController::class, 'index']);
+
+});
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
-Route::get('/products', function() {
-    return Product::all();
-});
-
-Route::post('/products', function() {
-    return Product::create([
-        'name' => 'Product One',
-    ]);
-});
